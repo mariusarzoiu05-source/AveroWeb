@@ -10,6 +10,10 @@
     content="Avero detects phishing and protects your accounts with fast scans, smart alerts, and a premium experience." />
   <meta name="theme-color" content="#0b0f1a" />
 
+  <link rel="icon" type="image/png" sizes="32x32" href="AveroLogo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="AveroLogo.png">
+  <link rel="apple-touch-icon" href="AveroLogo.png">
+
   <style>
     :root {
 
@@ -372,7 +376,7 @@
     .hero p {
       margin: 0;
       color: var(--muted);
-      font-size: 15.5px;
+      font-size: 16.5px;
       line-height: 1.6;
       max-width: 62ch;
     }
@@ -739,7 +743,7 @@
 
     .section-title h3 {
       margin: 0;
-      font-size: 22px;
+      font-size: 24px;
       letter-spacing: -.02em;
     }
 
@@ -834,7 +838,7 @@
     .feature p {
       margin: 0;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 14px;
       line-height: 1.55;
     }
 
@@ -1089,6 +1093,58 @@
     @media (max-width: 920px) {
       .contact-wrap {
         grid-template-columns: 1fr;
+      }
+    }
+
+    /* NAV — mobile resize */
+    @media (max-width: 520px) {
+      body {
+        padding-top: 62px;
+      }
+
+      /* navbar mai mic => mai puțin spațiu sus */
+
+      .nav-inner {
+        padding: 10px 0;
+      }
+
+      /* reduce înălțimea barei */
+      .brand {
+        gap: 8px;
+      }
+
+      .logo-img {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+      }
+
+      .brand h1 {
+        font-size: 15px;
+      }
+
+      .brand span {
+        display: none;
+      }
+
+      /* ascunde tagline pe mobil ca să încapă */
+
+      /* butoane mai compacte */
+      .btn {
+        padding: 10px 12px;
+        border-radius: 14px;
+        font-size: 12px;
+      }
+
+      /* tu ai .btn-text = 15px (global). Pe mobil îl micșorăm */
+      .btn-text {
+        font-size: 12px;
+      }
+
+      /* un pic mai mic și la icon */
+      .btn svg {
+        width: 14px;
+        height: 14px;
       }
     }
 
@@ -1559,7 +1615,7 @@
           </div>
 
           <div class="form-row">
-            <input id="email" placeholder="you@example.com" />
+            <input id="email" type="email" placeholder="you@example.com" autocomplete="email" required />
             <button class="btn primary" id="joinBtn"><span class="dot"></span> Join</button>
           </div>
 
@@ -1730,22 +1786,53 @@
       runScan();
       urlInput.focus();
     });
-
-    // Join CTA (dummy)
+    // Join CTA (Firebase)
     const joinBtn = document.getElementById('joinBtn');
     const email = document.getElementById('email');
     const joinMsg = document.getElementById('joinMsg');
 
-    joinBtn.addEventListener('click', () => {
-      const v = (email.value || '').trim();
+    function setJoinMsg(text, kind = "ok") {
+      joinMsg.textContent = text;
+      if (kind === "ok") joinMsg.style.color = "rgba(64,243,179,.95)";
+      else if (kind === "warn") joinMsg.style.color = "rgba(255,211,122,.95)";
+      else joinMsg.style.color = "rgba(255,77,109,.95)";
+    }
+
+    async function onJoin() {
+      const v = (email.value || '').trim().toLowerCase();
+
       if (!v || !v.includes('@')) {
-        joinMsg.textContent = "Please enter a valid email.";
-        joinMsg.style.color = "rgba(255,211,122,.95)";
+        setJoinMsg("Please enter a valid email.", "warn");
         return;
       }
-      joinMsg.textContent = "You're on the list ✔";
-      joinMsg.style.color = "rgba(64,243,179,.95)";
-      email.value = "";
+
+      // UI loading
+      joinBtn.disabled = true;
+      const old = joinBtn.innerHTML;
+      joinBtn.innerHTML = '<span class="dot"></span> Saving…';
+      setJoinMsg("");
+
+      try {
+        await window.averoJoinNewsletter(v);
+        setJoinMsg("You're on the list ✔", "ok");
+        email.value = "";
+      } catch (e) {
+        console.error(e);
+        setJoinMsg("Could not save. Try again.", "danger");
+      } finally {
+        joinBtn.disabled = false;
+        joinBtn.innerHTML = old;
+      }
+    }
+
+    joinBtn.addEventListener('click', onJoin);
+    email.addEventListener('keydown', (e) => {
+      if (e.key === "Enter") onJoin();
+    });
+
+    // Enter key support
+    email.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') joinBtn.click();
     });
 
     // Copy email (contact)
@@ -1796,6 +1883,45 @@
       lastScroll = currentScroll;
     });
 
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Config-ul tău (copiat exact)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBaRAmFLvCWcMzJvyZfxvaS8rB_LeoH8Jk",
+      authDomain: "avero-ebb6e.firebaseapp.com",
+      projectId: "avero-ebb6e",
+      storageBucket: "avero-ebb6e.firebasestorage.app",
+      messagingSenderId: "748176469812",
+      appId: "1:748176469812:web:72e5634b3145ffd9457f61",
+      measurementId: "G-F9XV0R4VB0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // helper: face un ID sigur din email (fără duplicate)
+    function emailToId(email) {
+      return email
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .replace(/[^a-z0-9@._-]/g, "_");
+    }
+
+    // expun funcția către script-ul normal
+    window.averoJoinNewsletter = async (email) => {
+      const id = emailToId(email);
+
+      await setDoc(doc(db, "newsletter_signups", id), {
+        email,
+        createdAt: serverTimestamp(),
+        source: "avero-landing"
+      }, { merge: true });
+    };
   </script>
 
 </body>
