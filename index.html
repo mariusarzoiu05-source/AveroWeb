@@ -1,1942 +1,1207 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
-
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Avero — Stay safe, Stay online</title>
-  <meta name="description"
-    content="Avero detects phishing and protects your accounts with fast scans, smart alerts, and a premium experience." />
-  <meta name="theme-color" content="#0b0f1a" />
-
-  <link rel="icon" type="image/png" sizes="32x32" href="AveroLogo.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="AveroLogo.png">
-  <link rel="apple-touch-icon" href="AveroLogo.png">
-
-  <style>
-    :root {
-
-
-      --bg0: #060a12;
-      --bg1: #0c1422;
-
-      --card: rgba(255, 255, 255, .06);
-      --card2: rgba(255, 255, 255, .09);
-      --stroke: rgba(255, 255, 255, .12);
-
-      --text: rgba(234, 242, 255, .92);
-      /* #EAF2FF */
-      --muted: rgba(159, 179, 200, .78);
-      /* #9FB3C8 */
-      --muted2: rgba(159, 179, 200, .55);
-
-      --brand: #00E0C7;
-      /* teal electric */
-      --brand2: #3B82F6;
-      /* blue accent */
-
-      --ok: #2DE1A3;
-      --warn: #FFC857;
-      --danger: #FF4D6D;
-
-      --shadow: 0 18px 80px rgba(0, 0, 0, .55);
-      --shadow2: 0 12px 40px rgba(0, 0, 0, .45);
-      --r: 22px;
-      --r2: 28px;
-      --container: 1180px;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      height: 100%;
-    }
-
-    body {
-      margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      color: var(--text);
-      background: var(--bg0);
-      /* doar baza */
-      overflow-x: hidden;
-      padding-top: 72px;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: -3;
-      pointer-events: none;
-
-      background:
-        radial-gradient(1200px 800px at 18% 12%, rgba(0, 224, 199, .18), transparent 60%),
-        radial-gradient(900px 700px at 88% 22%, rgba(59, 130, 246, .16), transparent 55%),
-        radial-gradient(900px 700px at 25% 92%, rgba(0, 224, 199, .10), transparent 60%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .container {
-      width: min(var(--container), 92%);
-      margin: 0 auto;
-    }
-
-    /* Ambient animated blobs */
-    /* Ambient animated blobs (FIX for horizontal band seam) */
-    .ambient {
-      position: fixed;
-      inset: -35vh -25vw -35vh -25vw;
-      pointer-events: none;
-      z-index: -1;
-      /* IMPORTANT: peste background layers */
-      filter: none;
-      opacity: .85;
-      transform: translateZ(0);
-      will-change: transform;
-    }
-
-    .blob {
-      position: absolute;
-      width: 520px;
-      height: 520px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, rgba(0, 224, 199, .85), rgba(0, 224, 199, 0) 60%);
-      filter: blur(40px);
-      mix-blend-mode: normal;
-      animation: float1 16s ease-in-out infinite;
-
-      /* move blur here instead */
-      filter: blur(35px);
-
-      /* keep or remove (screen sometimes causes seams) */
-      mix-blend-mode: screen;
-
-      transform: translateZ(0);
-      will-change: transform;
-    }
-
-    .blob.b2 {
-      left: 55%;
-      top: 10%;
-      width: 640px;
-      height: 640px;
-      background: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, .70), rgba(59, 130, 246, 0) 62%);
-      animation: float2 18s ease-in-out infinite;
-    }
-
-    .blob.b3 {
-      left: 10%;
-      top: 52%;
-      width: 460px;
-      height: 460px;
-      background: radial-gradient(circle at 30% 30%, rgba(0, 224, 199, .50), rgba(0, 224, 199, 0) 60%);
-      animation: float3 20s ease-in-out infinite;
-    }
-
-    @keyframes float1 {
-
-      0%,
-      100% {
-        transform: translate(0, 0)
-      }
-
-      50% {
-        transform: translate(60px, 40px)
-      }
-    }
-
-    @keyframes float2 {
-
-      0%,
-      100% {
-        transform: translate(0, 0)
-      }
-
-      50% {
-        transform: translate(-70px, 55px)
-      }
-    }
-
-    @keyframes float3 {
-
-      0%,
-      100% {
-        transform: translate(0, 0)
-      }
-
-      50% {
-        transform: translate(50px, -40px)
-      }
-    }
-
-    /* Top nav */
-    .nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 100;
-      transition: transform .35s ease, opacity .25s ease;
-
-      /* fundal închis */
-      background: rgba(6, 10, 18, .78);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(255, 255, 255, .08);
-    }
-
-    .nav.hide {
-      transform: translateY(-100%);
-    }
-
-    .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 0;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      letter-spacing: .2px;
-    }
-
-    .logo {
-      width: 38px;
-      height: 38px;
-      border-radius: 14px;
-      background:
-        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, .35), transparent 52%),
-        linear-gradient(135deg, rgba(106, 227, 255, .95), rgba(139, 92, 255, .92));
-      box-shadow: 0 14px 40px rgba(139, 92, 255, .18), 0 12px 35px rgba(106, 227, 255, .14);
-      border: 1px solid rgba(255, 255, 255, .18);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .logo:after {
-      content: "";
-      position: absolute;
-      inset: -60% -60%;
-      background: conic-gradient(from 180deg, transparent, rgba(255, 255, 255, .35), transparent);
-      animation: spin 4.2s linear infinite;
-      opacity: .7;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg)
-      }
-    }
-
-    .brand h1 {
-      font-size: 19px;
-      margin: 0;
-      font-weight: 720;
-    }
-
-    .brand span {
-      display: block;
-      font-size: 12px;
-      color: var(--muted2);
-      margin-top: 2px;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 18px;
-      align-items: center;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .nav-links a {
-      padding: 10px 10px;
-      border-radius: 12px;
-      transition: .2s ease;
-    }
-
-    .nav-links a:hover {
-      background: rgba(255, 255, 255, .06);
-      color: var(--text);
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      border-radius: 16px;
-      padding: 12px 16px;
-      font-weight: 700;
-      font-size: 13px;
-      border: 1px solid rgba(255, 255, 255, .14);
-      background: rgba(255, 255, 255, .06);
-      color: var(--text);
-      cursor: pointer;
-      transition: transform .15s ease, background .2s ease, border-color .2s ease;
-      user-select: none;
-      white-space: nowrap;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      background: rgba(255, 255, 255, .09);
-      border-color: rgba(255, 255, 255, .20);
-    }
-
-    .btn.primary {
-      background: linear-gradient(135deg, rgba(0, 224, 199, .95), rgba(59, 130, 246, .92));
-      box-shadow: 0 18px 55px rgba(0, 224, 199, .15), 0 18px 55px rgba(59, 130, 246, .12);
-      border-color: rgba(255, 255, 255, .18);
-      box-shadow: 0 18px 55px rgba(106, 227, 255, .15), 0 18px 55px rgba(139, 92, 255, .12);
-      color: #07101a;
-    }
-
-    .btn.primary:hover {
-      transform: translateY(-2px);
-    }
-
-    .btn .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .75);
-      box-shadow: 0 0 18px rgba(255, 255, 255, .35);
-    }
-
-    /* Hero */
-    header {
-      padding: 64px 0 28px;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap: 22px;
-      align-items: stretch;
-    }
-
-    .hero-left {
-      padding: 26px 0;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      gap: 10px;
-      align-items: center;
-      padding: 9px 12px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .06);
-      border: 1px solid rgba(255, 255, 255, .12);
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .eyebrow .pill {
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: rgba(64, 243, 179, .12);
-      border: 1px solid rgba(64, 243, 179, .18);
-      color: rgba(64, 243, 179, .95);
-      font-weight: 700;
-      font-size: 11px;
-    }
-
-    .hero h2 {
-      margin: 16px 0 10px;
-      font-size: clamp(36px, 5.2vw, 56px);
-      line-height: 1.02;
-      letter-spacing: -0.03em;
-      font-weight: 860;
-    }
-
-    .grad {
-      background: linear-gradient(135deg, rgba(0, 224, 199, 1), rgba(59, 130, 246, 1));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .hero p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 16.5px;
-      line-height: 1.6;
-      max-width: 62ch;
-    }
-
-    .hero-cta {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      margin-top: 18px;
-      flex-wrap: wrap;
-    }
-
-    .hero-actions {
-      margin-top: 18px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .cta-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    /* butoane secundare mai “quiet” */
-    .btn.ghost {
-      background: rgba(12, 20, 34, .55);
-      border: 1px solid rgba(255, 255, 255, .10);
-      color: rgba(234, 242, 255, .86);
-      box-shadow: none;
-    }
-
-    .btn.ghost:hover {
-      background: rgba(12, 20, 34, .72);
-      border-color: rgba(255, 255, 255, .16);
-    }
-
-    /* micro-proof: linie finuță, premium */
-    .micro-proof {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-
-      flex-wrap: nowrap;
-      /* 👈 IMPORTANT */
-      width: fit-content;
-      /* 👈 se oprește exact la text */
-
-      padding: 10px 16px;
-      border-radius: 999px;
-      /* pill look mai premium */
-      background: rgba(12, 20, 34, .42);
-      border: 1px solid rgba(255, 255, 255, .08);
-    }
-
-    .mp {
-      display: flex;
-      gap: 6px;
-      align-items: baseline;
-      font-size: 12px;
-      color: rgba(159, 179, 200, .78);
-    }
-
-    .mp b {
-      color: rgba(234, 242, 255, .92);
-      font-weight: 800;
-    }
-
-    .sep {
-      width: 1px;
-      height: 14px;
-      background: rgba(255, 255, 255, .10);
-    }
-
-    /* chips mai mici, mai elegante */
-    .chip-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .chip2 {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 12px;
-      border-radius: 999px;
-      background: rgba(12, 20, 34, .48);
-      border: 1px solid rgba(255, 255, 255, .08);
-      color: rgba(159, 179, 200, .78);
-      font-size: 12px;
-    }
-
-    .meta {
-      margin-top: 14px;
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      color: var(--muted2);
-      font-size: 12px;
-    }
-
-    .meta b {
-      color: var(--text);
-      font-weight: 750;
-    }
-
-    /* Premium glass card */
-    .card {
-      border-radius: var(--r2);
-      background: linear-gradient(180deg,
-          rgba(12, 20, 34, .92),
-          rgba(10, 16, 28, .86));
-      border: 1px solid rgba(255, 255, 255, .12);
-      box-shadow: var(--shadow2);
-      backdrop-filter: blur(14px);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card:before {
-      content: "";
-      position: absolute;
-      inset: -1px;
-      pointer-events: none;
-
-      /* DOAR alb (fără teal / mov) */
-      background:
-        radial-gradient(1200px 320px at 20% 0%,
-          rgba(255, 255, 255, .10), transparent 58%),
-        radial-gradient(900px 280px at 85% 0%,
-          rgba(255, 255, 255, .06), transparent 62%);
-
-      opacity: .9;
-    }
-
-    /* Right demo card */
-    .demo {
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      min-height: 380px;
-    }
-
-    .demo-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .demo-title {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .demo-title h3 {
-      margin: 0;
-      font-size: 14px;
-      letter-spacing: .2px;
-    }
-
-    .demo-title span {
-      margin: 0;
-      font-size: 12px;
-      color: var(--muted2);
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .06);
-      border: 1px solid rgba(255, 255, 255, .12);
-      color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
-    .chip i {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(64, 243, 179, .95);
-      box-shadow: 0 0 16px rgba(64, 243, 179, .28);
-    }
-
-    .panel {
-      position: relative;
-      z-index: 1;
-      border-radius: 18px;
-      background: rgba(0, 0, 0, .22);
-
-      .panel {
-        background: rgba(0, 0, 0, .34);
-      }
-
-      padding: 14px;
-      overflow: hidden;
-    }
-
-    .panel-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .mini {
-      border-radius: 16px;
-      background: rgba(255, 255, 255, .06);
-      border: 1px solid rgba(255, 255, 255, .10);
-      padding: 12px;
-    }
-
-    .mini .k {
-      font-size: 11px;
-      color: var(--muted2);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .badge {
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, .16);
-      background: rgba(255, 255, 255, .06);
-      color: var(--muted);
-    }
-
-    .mini .v {
-      margin-top: 8px;
-      font-weight: 860;
-      letter-spacing: -.02em;
-      font-size: 18px;
-    }
-
-    .mini .sub {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    .scan {
-      margin-top: 10px;
-      border-radius: 18px;
-      background: rgba(12, 20, 34, .75);
-      border: 1px solid rgba(255, 255, 255, .10);
-      padding: 12px;
-      position: relative;
-    }
-
-    .scan label {
-      display: block;
-      font-size: 11px;
-      color: var(--muted2);
-      margin-bottom: 8px;
-    }
-
-    .scan .row {
-      display: flex;
-      gap: 10px;
-    }
-
-    input {
-      width: 100%;
-      border-radius: 14px;
-      padding: 12px 12px;
-      border: 1px solid rgba(255, 255, 255, .12);
-      background: rgba(0, 0, 0, .22);
-      color: var(--text);
-      outline: none;
-      font-size: 13px;
-    }
-
-    input::placeholder {
-      color: rgba(255, 255, 255, .45);
-    }
-
-    .scan .result {
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, .10);
-      background: rgba(0, 0, 0, .20);
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .state {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 800;
-      color: var(--text);
-    }
-
-    .state .s {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .35);
-      box-shadow: 0 0 18px rgba(255, 255, 255, .12);
-    }
-
-    .state.safe .s {
-      background: rgba(64, 243, 179, .95);
-      box-shadow: 0 0 18px rgba(64, 243, 179, .26);
-    }
-
-    .state.warn .s {
-      background: rgba(255, 211, 122, .95);
-      box-shadow: 0 0 18px rgba(255, 211, 122, .22);
-    }
-
-    .state.danger .s {
-      background: rgba(255, 107, 139, .95);
-      box-shadow: 0 0 18px rgba(255, 107, 139, .22);
-    }
-
-    .bar {
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .08);
-      border: 1px solid rgba(255, 255, 255, .10);
-      overflow: hidden;
-      margin-top: 10px;
-    }
-
-    .bar>div {
-      height: 100%;
-      width: 42%;
-      background: linear-gradient(90deg, rgba(0, 224, 199, .95), rgba(59, 130, 246, .92));
-      border-radius: 999px;
-      transition: width .35s ease;
-    }
-
-    /* Sections */
-    section {
-      padding: 44px 0;
-    }
-
-    .section-title {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .section-title h3 {
-      margin: 0;
-      font-size: 24px;
-      letter-spacing: -.02em;
-    }
-
-    .section-title p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      max-width: 64ch;
-      line-height: 1.55;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-    }
-
-    .nav-links a {
-      position: relative;
-      font-size: 0.95rem;
-      font-weight: 500;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.75);
-      text-decoration: none;
-      padding: 8px 4px;
-      transition: all 0.25s ease;
-    }
-
-    /* hover glow subtil */
-    .nav-links a:hover {
-      color: #ffffff;
-    }
-
-    /* underline animat premium */
-    .nav-links a::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      bottom: -4px;
-      width: 0%;
-      height: 2px;
-      background: linear-gradient(90deg, #6ae3ff, #8b5cff);
-      transition: width 0.3s ease;
-      border-radius: 2px;
-    }
-
-    .nav-links a:hover::after {
-      width: 100%;
-    }
-
-
-    .btn-text {
-      font-size: 15px;
-      /* pune cât vrei: 18px, 22px etc */
-    }
-
-    .feature {
-      padding: 16px;
-      border-radius: var(--r);
-      background: rgba(12, 20, 34, .75);
-      border: 1px solid rgba(255, 255, 255, .10);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
-      position: relative;
-      overflow: hidden;
-      transition: transform .18s ease, background .2s ease, border-color .2s ease;
-    }
-
-    .feature:hover {
-      transform: translateY(-3px);
-      background: rgba(255, 255, 255, .07);
-      border-color: rgba(255, 255, 255, .14);
-    }
-
-    .icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, .07);
-      border: 1px solid rgba(255, 255, 255, .12);
-      display: grid;
-      place-items: center;
-      margin-bottom: 10px;
-    }
-
-    .feature h4 {
-      margin: 0 0 8px;
-      font-size: 15px;
-      letter-spacing: .1px;
-    }
-
-    .feature p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.55;
-    }
-
-    /* Trust row */
-    .trust {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      padding-top: 6px;
-    }
-
-    .trust .t {
-      padding: 10px 12px;
-      border-radius: 999px;
-      background: rgba(12, 20, 34, .75);
-      border: 1px solid rgba(255, 255, 255, .10);
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    /* Pricing */
-    .pricing {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 14px;
-    }
-
-    .price-card {
-      padding: 16px;
-      border-radius: var(--r2);
-      background: rgba(12, 20, 34, .75);
-      border: 1px solid rgba(255, 255, 255, .10);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .price-card.pop {
-      background: linear-gradient(180deg, rgba(106, 227, 255, .10), rgba(139, 92, 255, .08));
-      border-color: rgba(255, 255, 255, .16);
-      box-shadow: 0 18px 65px rgba(106, 227, 255, .10), 0 18px 65px rgba(139, 92, 255, .08);
-    }
-
-    .price-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .price-card h4 {
-      margin: 0;
-      font-size: 15px;
-    }
-
-    .price-card .tag {
-      font-size: 11px;
-      padding: 5px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, .16);
-      background: rgba(255, 255, 255, .06);
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    .amount {
-      font-size: 30px;
-      font-weight: 900;
-      letter-spacing: -.03em;
-      margin-top: 4px;
-    }
-
-    .amount small {
-      font-size: 12px;
-      color: var(--muted2);
-      font-weight: 700;
-    }
-
-    .list {
-      margin: 12px 0 0;
-      padding: 0;
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .list li {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      line-height: 1.45;
-    }
-
-    .check {
-      width: 18px;
-      height: 18px;
-      border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, .18);
-      background: rgba(64, 243, 179, .14);
-      display: grid;
-      place-items: center;
-      flex: 0 0 auto;
-      margin-top: 1px;
-    }
-
-    .check svg {
-      width: 12px;
-      height: 12px;
-    }
-
-    .logo-img {
-      width: 38px;
-      height: 38px;
-      object-fit: contain;
-      border-radius: 12px;
-      filter: drop-shadow(0 0 12px rgba(0, 224, 199, .25));
-    }
-
-    /* FAQ */
-    .faq {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: 1fr 1fr;
-    }
-
-    details {
-      border-radius: var(--r);
-      background: rgba(12, 20, 34, .75);
-      border: 1px solid rgba(255, 255, 255, .10);
-      padding: 12px 14px;
-    }
-
-    summary {
-      cursor: pointer;
-      font-weight: 800;
-      font-size: 13px;
-      color: var(--text);
-      list-style: none;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    summary::-webkit-details-marker {
-      display: none;
-    }
-
-    details p {
-      margin: 10px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.55;
-    }
-
-    .chev {
-      width: 20px;
-      height: 20px;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, .12);
-      background: rgba(255, 255, 255, .08);
-      display: grid;
-      place-items: center;
-      transition: transform .2s ease;
-      flex: 0 0 auto;
-    }
-
-    details[open] .chev {
-      transform: rotate(180deg);
-    }
-
-    /* Contact */
-    .contact-wrap {
-      display: grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap: 14px;
-      align-items: stretch;
-    }
-
-    .contact-card {
-      padding: 18px;
-    }
-
-    .contact-card h3 {
-      margin: 0 0 6px;
-      font-size: 22px;
-      letter-spacing: -.02em;
-    }
-
-    .contact-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.55;
-    }
-
-    .form-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    .form-row input {
-      flex: 1 1 260px;
-      min-width: 240px;
-    }
-
-    .small-note {
-      margin-top: 10px;
-      color: var(--muted2);
-      font-size: 12px;
-    }
-
-    .contact-side {
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .kv {
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, .10);
-      background: rgba(255, 255, 255, .04);
-      padding: 14px;
-    }
-
-    .kv .k {
-      color: var(--muted2);
-      font-size: 11px;
-      margin-bottom: 6px;
-    }
-
-    .kv .v {
-      font-weight: 850;
-      letter-spacing: -.01em;
-    }
-
-    .copy {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-
-    /* Mobile contact */
-    @media (max-width: 920px) {
-      .contact-wrap {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* NAV — mobile resize */
-    @media (max-width: 520px) {
-      body {
-        padding-top: 62px;
-      }
-
-      /* navbar mai mic => mai puțin spațiu sus */
-
-      .nav-inner {
-        padding: 10px 0;
-      }
-
-      /* reduce înălțimea barei */
-      .brand {
-        gap: 8px;
-      }
-
-      .logo-img {
-        width: 32px;
-        height: 32px;
-        border-radius: 10px;
-      }
-
-      .brand h1 {
-        font-size: 15px;
-      }
-
-      .brand span {
-        display: none;
-      }
-
-      /* ascunde tagline pe mobil ca să încapă */
-
-      /* butoane mai compacte */
-      .btn {
-        padding: 10px 12px;
-        border-radius: 14px;
-        font-size: 12px;
-      }
-
-      /* tu ai .btn-text = 15px (global). Pe mobil îl micșorăm */
-      .btn-text {
-        font-size: 12px;
-      }
-
-      /* un pic mai mic și la icon */
-      .btn svg {
-        width: 14px;
-        height: 14px;
-      }
-    }
-
-    /* Footer */
-    footer {
-      padding: 28px 0 34px;
-      border-top: 1px solid rgba(255, 255, 255, .08);
-      color: var(--muted2);
-      font-size: 12px;
-    }
-
-    .foot {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .links {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .links a {
-      color: var(--muted);
-    }
-
-    .links a:hover {
-      color: var(--text);
-    }
-
-    /* Reveal animations */
-    .reveal {
-      opacity: 0;
-      transform: translateY(14px);
-      transition: opacity .55s ease, transform .55s ease;
-    }
-
-    .reveal.show {
-      opacity: 1;
-      transform: none;
-    }
-
-    /* Mobile */
-    .burger {
-      display: none;
-    }
-
-    @media (max-width: 920px) {
-      .hero {
-        grid-template-columns: 1fr;
-      }
-
-      .demo {
-        min-height: unset;
-      }
-
-      .grid-3 {
-        grid-template-columns: 1fr;
-      }
-
-      .pricing {
-        grid-template-columns: 1fr;
-      }
-
-      .faq {
-        grid-template-columns: 1fr;
-      }
-
-      .nav-links {
-        display: none;
-      }
-
-      .burger {
-        display: inline-flex;
-      }
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Avero — Phishing protection, reimagined.</title>
+<meta name="description" content="On-device AI that detects phishing links, checks passwords, and protects you in real time. Free on Android."/>
+<meta name="theme-color" content="#03050D"/>
+<link rel="icon" href="AveroLogo.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ╔══════════════════════════════════════════╗
+   ║  TOKENS                                  ║
+   ╚══════════════════════════════════════════╝ */
+:root{
+  --bg:      #03050D;
+  --bg2:     #060A16;
+  --surf:    #080E1C;
+  --surfhi:  #0C1428;
+  --line:    rgba(255,255,255,.07);
+  --line2:   rgba(255,255,255,.12);
+  --line3:   rgba(255,255,255,.18);
+  --c:       #00C8F0;      /* cyan accent */
+  --cg:      rgba(0,200,240,.15);
+  --g:       #28D98A;      /* green */
+  --r:       #E84D5C;      /* red */
+  --a:       #F5A623;      /* amber */
+  --w:       rgba(235,243,255,.93);
+  --m:       rgba(175,200,225,.65);
+  --d:       rgba(130,160,190,.38);
+  --serif:   'Playfair Display',Georgia,serif;
+  --sans:    'Inter',system-ui,sans-serif;
+  --ease:    cubic-bezier(.22,1,.36,1);
+  --ease2:   cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--w);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+img{display:block}
+button{font-family:var(--sans);cursor:pointer;border:none;background:none}
+input{font-family:var(--sans)}
+
+/* ╔══════════════════════════════════════════╗
+   ║  BACKGROUND                              ║
+   ╚══════════════════════════════════════════╝ */
+.bg-layer{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80vw 60vh at 20% 0%,rgba(0,200,240,.08) 0%,transparent 70%),
+    radial-gradient(ellipse 60vw 50vh at 85% 15%,rgba(0,140,200,.05) 0%,transparent 70%),
+    radial-gradient(ellipse 70vw 50vh at 10% 90%,rgba(0,100,180,.04) 0%,transparent 70%);
+}
+.bg-grid{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+  background-size:72px 72px;
+  mask-image:radial-gradient(ellipse 100% 100% at 50% 0%,black 30%,transparent 80%);
+}
+
+/* ╔══════════════════════════════════════════╗
+   ║  LAYOUT                                  ║
+   ╚══════════════════════════════════════════╝ */
+.page{position:relative;z-index:2}
+.w{max-width:1100px;margin:0 auto;padding:0 32px}
+
+hr.sep{
+  border:none;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--line2) 30%,var(--line2) 70%,transparent);
+  margin:0;
+}
+
+/* ╔══════════════════════════════════════════╗
+   ║  BUTTONS                                 ║
+   ╚══════════════════════════════════════════╝ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-family:var(--sans);font-weight:600;font-size:13px;letter-spacing:.01em;
+  padding:10px 20px;border-radius:12px;
+  border:1px solid var(--line3);
+  background:rgba(255,255,255,.06);
+  color:var(--w);
+  transition:all .2s var(--ease2);
+  white-space:nowrap;cursor:pointer;user-select:none;
+}
+.btn:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.22);transform:translateY(-1px)}
+.btn-c{
+  background:var(--c);color:#011018;
+  border-color:transparent;
+  box-shadow:0 0 28px rgba(0,200,240,.24);
+  font-weight:700;
+}
+.btn-c:hover{background:#1ad4ff;box-shadow:0 0 40px rgba(0,200,240,.36);transform:translateY(-2px)}
+.btn-ghost{background:transparent;border-color:var(--line2);color:var(--m)}
+.btn-ghost:hover{color:var(--w);border-color:var(--line3)}
+.btn-lg{font-size:14px;padding:13px 26px;border-radius:14px}
+
+/* ╔══════════════════════════════════════════╗
+   ║  NAV                                     ║
+   ╚══════════════════════════════════════════╝ */
+.nav{
+  position:fixed;top:0;left:0;width:100%;z-index:200;
+  transition:transform .4s var(--ease);
+}
+.nav.hide{transform:translateY(-100%)}
+.nav-pill{
+  margin:12px 24px 0;
+  background:rgba(6,10,22,.82);
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  border:1px solid var(--line2);
+  border-radius:20px;
+  padding:0 20px;
+  height:54px;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-img{
+  width:28px;height:28px;border-radius:8px;object-fit:contain;
+  filter:drop-shadow(0 0 8px rgba(0,200,240,.4));
+}
+.brand-name{font-size:15px;font-weight:700;letter-spacing:-.02em}
+.nav-links{display:flex;align-items:center;gap:1px}
+.nav-links a{
+  font-size:13px;font-weight:500;color:var(--m);
+  padding:7px 13px;border-radius:10px;
+  transition:color .2s,background .2s;
+}
+.nav-links a:hover{color:var(--w);background:rgba(255,255,255,.05)}
+.nav-r{display:flex;align-items:center;gap:9px}
+.burger{display:none;color:var(--m);padding:6px 10px;font-size:17px}
+.mob-menu{
+  display:none;flex-direction:column;gap:2px;
+  padding:10px 20px 14px;
+  background:rgba(6,10,22,.96);
+  border-top:1px solid var(--line);
+  border-radius:0 0 18px 18px;
+}
+.mob-menu.open{display:flex}
+.mob-menu a{
+  font-size:14px;font-weight:500;color:var(--m);
+  padding:10px 12px;border-radius:10px;
+  transition:color .2s,background .2s;
+}
+.mob-menu a:hover{color:var(--w);background:rgba(255,255,255,.05)}
+
+/* ╔══════════════════════════════════════════╗
+   ║  HERO                                    ║
+   ╚══════════════════════════════════════════╝ */
+.hero{
+  padding:150px 0 110px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:64px;align-items:center;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--c);margin-bottom:26px;
+}
+.hero-tag-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--c);box-shadow:0 0 8px var(--c);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.75);opacity:.5}}
+
+.hero h1{
+  font-family:var(--serif);
+  font-size:clamp(46px,5.8vw,74px);
+  font-weight:400;line-height:1.02;letter-spacing:-.02em;
+  margin-bottom:20px;
+}
+.hero h1 em{font-style:italic;color:var(--c)}
+.hero-desc{
+  font-size:16px;line-height:1.72;color:var(--m);
+  max-width:46ch;margin-bottom:38px;font-weight:300;
+}
+.hero-cta{display:flex;flex-direction:column;gap:22px}
+.hero-btns{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.hero-proof{display:flex;gap:22px;flex-wrap:wrap}
+.proof{
+  display:flex;align-items:center;gap:7px;
+  font-size:12px;color:var(--d);font-weight:400;
+}
+.proof-tick{
+  width:14px;height:14px;border-radius:4px;
+  background:rgba(40,217,138,.10);border:1px solid rgba(40,217,138,.25);
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+}
+.proof-tick svg{width:8px;height:8px}
+
+/* Phone mockup */
+.phone-scene{
+  position:relative;
+  display:flex;justify-content:center;align-items:center;
+}
+.phone-halo{
+  position:absolute;
+  width:340px;height:340px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,200,240,.11) 0%,transparent 68%);
+  filter:blur(50px);pointer-events:none;
+}
+.phone{
+  position:relative;width:262px;
+  background:rgba(6,10,20,.97);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:40px;
+  padding:18px 16px 22px;
+  box-shadow:
+    0 70px 140px rgba(0,0,0,.7),
+    0 0 0 1px rgba(0,200,240,.06),
+    inset 0 1px 0 rgba(255,255,255,.07);
+  overflow:hidden;
+}
+.phone::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 10%,rgba(0,200,240,.6) 50%,transparent 90%);
+}
+.phone-notch{
+  width:72px;height:5px;border-radius:3px;
+  background:rgba(255,255,255,.07);margin:0 auto 16px;
+}
+.pscreen{display:flex;flex-direction:column;gap:9px}
+
+.ptop{display:flex;align-items:center;justify-content:space-between}
+.ptop-title{font-size:13px;font-weight:700;letter-spacing:-.01em}
+.plive{
+  display:flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:600;color:var(--g);
+}
+.plive-dot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:pulse 1.6s infinite}
+
+.pinput{
+  background:rgba(0,0,0,.35);border:1px solid var(--line2);
+  border-radius:11px;padding:9px 11px;
+}
+.pinput-lbl{font-size:9px;color:var(--d);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.pinput-url{font-size:10px;color:var(--m);font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.pbtn{
+  width:100%;padding:9px;border-radius:10px;
+  background:var(--c);color:#011018;
+  font-size:11px;font-weight:700;border:none;cursor:default;
+  box-shadow:0 0 18px rgba(0,200,240,.22);
+}
+
+.presult{
+  background:rgba(232,77,92,.06);
+  border:1px solid rgba(232,77,92,.17);
+  border-radius:12px;padding:10px 11px;
+}
+.presult-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.presult-lbl{font-size:9px;color:var(--d);text-transform:uppercase;letter-spacing:.07em}
+.presult-badge{
+  font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;
+  background:rgba(232,77,92,.14);color:var(--r);border:1px solid rgba(232,77,92,.25);
+}
+.pscore{display:flex;align-items:baseline;gap:5px;margin-bottom:5px}
+.pscore-n{font-family:var(--serif);font-size:34px;line-height:1;color:var(--r)}
+.pscore-d{font-size:11px;color:var(--d)}
+.pbar{height:3px;border-radius:2px;background:rgba(255,255,255,.06);overflow:hidden}
+.pbar-fill{height:100%;width:91%;background:linear-gradient(90deg,var(--a),var(--r))}
+.ptags{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.ptag{
+  font-size:9px;padding:2px 7px;border-radius:5px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--d);
+}
+
+.psafe{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;
+  background:rgba(40,217,138,.05);border:1px solid rgba(40,217,138,.12);
+  border-radius:10px;
+}
+.psafe-dot{width:5px;height:5px;border-radius:50%;background:var(--g);flex:0 0 auto}
+.psafe-url{font-size:10px;color:var(--m);font-family:monospace;flex:1}
+.psafe-score{font-size:10px;font-weight:700;color:var(--g)}
+
+/* ╔══════════════════════════════════════════╗
+   ║  SECTION COMMONS                         ║
+   ╚══════════════════════════════════════════╝ */
+section{padding:100px 0}
+.eyebrow{
+  font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--c);margin-bottom:14px;
+}
+.sh{
+  font-family:var(--serif);
+  font-size:clamp(30px,3.6vw,46px);
+  font-weight:400;letter-spacing:-.025em;line-height:1.08;
+  margin-bottom:14px;
+}
+.sh em{font-style:italic;color:var(--c)}
+.sp{font-size:15px;line-height:1.7;color:var(--m);max-width:52ch;font-weight:300}
+
+/* ╔══════════════════════════════════════════╗
+   ║  FEATURES                                ║
+   ╚══════════════════════════════════════════╝ */
+.feat-head{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:24px;margin-bottom:50px;
+}
+.feat-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);
+  border-radius:26px;overflow:hidden;
+}
+.feat{
+  background:var(--surf);
+  padding:30px 26px;
+  position:relative;overflow:hidden;
+  transition:background .3s;
+}
+.feat:hover{background:var(--surfhi)}
+.feat::after{
+  content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,200,240,.35),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.feat:hover::after{opacity:1}
+.feat-ico{
+  width:40px;height:40px;border-radius:12px;margin-bottom:16px;
+  background:rgba(0,200,240,.07);border:1px solid rgba(0,200,240,.14);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.feat h3{font-size:15px;font-weight:600;margin-bottom:8px;letter-spacing:-.01em}
+.feat p{font-size:13px;line-height:1.62;color:var(--m);font-weight:300}
+
+/* ╔══════════════════════════════════════════╗
+   ║  HOW IT WORKS                            ║
+   ╚══════════════════════════════════════════╝ */
+.how-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:64px;align-items:start;margin-top:56px;
+}
+.steps{display:flex;flex-direction:column}
+.step{
+  display:flex;gap:22px;
+  padding:26px 0;border-bottom:1px solid var(--line);
+}
+.step:last-child{border-bottom:none}
+.step-n{
+  flex:0 0 auto;
+  font-family:var(--serif);font-style:italic;
+  font-size:30px;line-height:1;
+  color:rgba(0,200,240,.22);width:38px;padding-top:2px;
+}
+.step h4{font-size:15px;font-weight:600;margin-bottom:5px;letter-spacing:-.01em}
+.step p{font-size:13px;line-height:1.62;color:var(--m);font-weight:300}
+
+.verdicts{
+  background:var(--surf);border:1px solid var(--line2);
+  border-radius:22px;overflow:hidden;
+  position:sticky;top:86px;
+}
+.v-head{
+  padding:14px 18px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.v-head-l{font-size:13px;font-weight:600}
+.v-head-r{font-size:11px;color:var(--d)}
+.v-list{padding:10px;display:flex;flex-direction:column;gap:5px}
+.v-row{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 12px;border-radius:11px;
+  background:rgba(255,255,255,.02);border:1px solid var(--line);
+  transition:background .2s;
+}
+.v-row:hover{background:rgba(255,255,255,.04)}
+.vd{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.vd.s{background:var(--g);box-shadow:0 0 8px rgba(40,217,138,.5)}
+.vd.w{background:var(--a);box-shadow:0 0 8px rgba(245,166,35,.5)}
+.vd.d{background:var(--r);box-shadow:0 0 8px rgba(232,77,92,.5)}
+.v-url{font-size:11px;color:var(--m);font-family:monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vb{
+  flex:0 0 auto;font-size:10px;font-weight:700;
+  padding:3px 9px;border-radius:7px;
+}
+.vb.s{background:rgba(40,217,138,.10);color:var(--g);border:1px solid rgba(40,217,138,.2)}
+.vb.w{background:rgba(245,166,35,.10);color:var(--a);border:1px solid rgba(245,166,35,.2)}
+.vb.d{background:rgba(232,77,92,.10);color:var(--r);border:1px solid rgba(232,77,92,.2)}
+
+/* ╔══════════════════════════════════════════╗
+   ║  DEMO SCANNER                            ║
+   ╚══════════════════════════════════════════╝ */
+.demo-layout{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:56px;align-items:center;margin-top:56px;
+}
+.demo-card{
+  background:var(--surf);border:1px solid var(--line2);
+  border-radius:24px;overflow:hidden;
+}
+.demo-topbar{
+  padding:13px 16px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:8px;
+}
+.demo-dots{display:flex;gap:5px}
+.dd{width:9px;height:9px;border-radius:50%}
+.dd:nth-child(1){background:#FF5F57}
+.dd:nth-child(2){background:#FFBD2E}
+.dd:nth-child(3){background:#28C840}
+.demo-lbl{font-size:11px;color:var(--d);margin-left:auto}
+.demo-body{padding:18px;display:flex;flex-direction:column;gap:14px}
+.demo-inp{
+  width:100%;background:rgba(0,0,0,.4);
+  border:1px solid var(--line);border-radius:12px;
+  padding:11px 14px;color:var(--w);font-size:13px;outline:none;
+  transition:border-color .2s;
+}
+.demo-inp:focus{border-color:rgba(0,200,240,.4)}
+.demo-inp::placeholder{color:var(--d)}
+.demo-sbtn{
+  width:100%;padding:11px;border-radius:12px;
+  background:var(--c);color:#011018;
+  font-family:var(--sans);font-weight:700;font-size:13px;
+  border:none;cursor:pointer;
+  transition:all .2s var(--ease2);
+  box-shadow:0 0 22px rgba(0,200,240,.2);
+}
+.demo-sbtn:hover{background:#18d4ff;box-shadow:0 0 32px rgba(0,200,240,.32);transform:translateY(-1px)}
+.demo-pbar{height:3px;border-radius:2px;background:rgba(255,255,255,.06);overflow:hidden}
+.demo-pbar-fill{height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,var(--c),#0095be);transition:width .55s var(--ease),background .4s}
+.demo-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.demo-state{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.demo-state-dot{width:8px;height:8px;border-radius:50%;background:var(--d)}
+.demo-state.safe .demo-state-dot{background:var(--g);box-shadow:0 0 8px rgba(40,217,138,.5)}
+.demo-state.warn .demo-state-dot{background:var(--a);box-shadow:0 0 8px rgba(245,166,35,.5)}
+.demo-state.danger .demo-state-dot{background:var(--r);box-shadow:0 0 8px rgba(232,77,92,.5)}
+.demo-sig{font-size:11px;color:var(--d)}
+.demo-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.demo-mini{
+  background:rgba(255,255,255,.02);border:1px solid var(--line);
+  border-radius:13px;padding:13px;
+}
+.dm-lbl{font-size:10px;color:var(--d);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
+.dm-val{font-family:var(--serif);font-size:28px;font-weight:400;line-height:1}
+.dm-sub{font-size:11px;color:var(--d);margin-top:4px}
+.demo-signals-box{
+  background:rgba(0,200,240,.04);border:1px solid rgba(0,200,240,.1);
+  border-radius:12px;padding:12px;
+}
+.dsb-lbl{font-size:10px;font-weight:600;color:var(--c);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.dsb-val{font-size:12px;color:var(--m);line-height:1.55}
+
+/* ╔══════════════════════════════════════════╗
+   ║  PRICING                                 ║
+   ╚══════════════════════════════════════════╝ */
+.pricing-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:16px;margin-top:52px;
+}
+.plan{
+  background:var(--surf);border:1px solid var(--line);
+  border-radius:26px;padding:30px;
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+.plan.pop{
+  border-color:rgba(0,200,240,.25);
+  background:linear-gradient(165deg,rgba(0,200,240,.06),rgba(0,100,160,.03));
+}
+.plan.pop::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--c),transparent);
+}
+.plan-chip{
+  display:inline-flex;align-self:flex-start;
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 10px;border-radius:7px;
+  background:rgba(0,200,240,.10);color:var(--c);border:1px solid rgba(0,200,240,.2);
+  margin-bottom:22px;
+}
+.plan-name{
+  font-family:var(--serif);font-size:28px;font-weight:400;
+  letter-spacing:-.025em;margin-bottom:5px;
+}
+.plan-desc{font-size:13px;color:var(--d);margin-bottom:28px;font-weight:300}
+.plan-hr{height:1px;background:var(--line);margin-bottom:26px}
+.plan-list{
+  list-style:none;display:flex;flex-direction:column;gap:12px;
+  flex:1;margin-bottom:30px;
+}
+.plan-list li{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:13px;color:var(--m);line-height:1.45;font-weight:300;
+}
+.pcheck{
+  flex:0 0 auto;width:16px;height:16px;border-radius:5px;margin-top:1px;
+  background:rgba(40,217,138,.08);border:1px solid rgba(40,217,138,.18);
+  display:flex;align-items:center;justify-content:center;
+}
+.pcheck svg{width:10px;height:10px}
+
+/* ╔══════════════════════════════════════════╗
+   ║  FAQ                                     ║
+   ╚══════════════════════════════════════════╝ */
+.faq-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:10px;margin-top:52px;
+}
+details{
+  background:var(--surf);border:1px solid var(--line);
+  border-radius:18px;padding:18px 22px;
+  transition:border-color .25s;
+}
+details[open]{border-color:rgba(0,200,240,.22)}
+summary{
+  cursor:pointer;list-style:none;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  font-size:14px;font-weight:600;color:var(--w);
+}
+summary::-webkit-details-marker{display:none}
+.faq-plus{
+  flex:0 0 auto;width:22px;height:22px;border-radius:7px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;color:var(--d);line-height:1;
+  transition:transform .22s,background .22s;
+}
+details[open] .faq-plus{transform:rotate(45deg);background:rgba(0,200,240,.09);color:var(--c)}
+details p{margin-top:13px;font-size:13px;line-height:1.68;color:var(--m);font-weight:300}
+
+/* ╔══════════════════════════════════════════╗
+   ║  CONTACT                                 ║
+   ╚══════════════════════════════════════════╝ */
+.contact-grid{
+  display:grid;grid-template-columns:1.35fr .65fr;
+  gap:14px;margin-top:52px;
+}
+.contact-main{
+  background:var(--surf);border:1px solid var(--line2);
+  border-radius:26px;padding:38px;
+  position:relative;overflow:hidden;
+}
+.contact-main::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(800px 500px at 0% 0%,rgba(0,200,240,.05),transparent 60%);
+}
+.contact-main h3{
+  font-family:var(--serif);font-size:34px;font-weight:400;
+  letter-spacing:-.025em;margin-bottom:8px;
+}
+.contact-main>p{font-size:14px;color:var(--m);margin-bottom:28px;font-weight:300}
+.inp-row{display:flex;gap:10px;flex-wrap:wrap}
+.txt-inp{
+  flex:1 1 200px;
+  background:rgba(0,0,0,.38);border:1px solid var(--line);border-radius:12px;
+  padding:12px 14px;color:var(--w);font-size:13px;outline:none;
+  transition:border-color .2s;
+}
+.txt-inp:focus{border-color:rgba(0,200,240,.4)}
+.txt-inp::placeholder{color:var(--d)}
+.join-note{margin-top:10px;font-size:12px;color:var(--d)}
+#joinMsg{font-weight:600}
+.contact-side{display:flex;flex-direction:column;gap:12px}
+.icard{
+  background:var(--surf);border:1px solid var(--line);
+  border-radius:18px;padding:18px 20px;flex:1;
+}
+.icard-lbl{
+  font-size:10px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--d);margin-bottom:8px;
+}
+.icard-val{font-size:14px;font-weight:600;line-height:1.4}
+.icard-val a{color:var(--c)}
+.icard-sub{font-size:12px;color:var(--d);margin-top:3px;font-weight:300}
+.copy-r{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+/* ╔══════════════════════════════════════════╗
+   ║  FOOTER                                  ║
+   ╚══════════════════════════════════════════╝ */
+footer{
+  border-top:1px solid var(--line);
+  padding:34px 0;
+}
+.foot{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:18px;flex-wrap:wrap;
+}
+.foot-brand{display:flex;align-items:center;gap:9px}
+.foot-brand img{width:22px;height:22px;border-radius:7px;object-fit:contain}
+.foot-brand span{font-size:14px;font-weight:700;letter-spacing:-.01em}
+.foot-copy{font-size:11px;color:var(--d);margin-top:3px}
+.foot-links{display:flex;gap:20px;flex-wrap:wrap}
+.foot-links a{font-size:12px;color:var(--d);transition:color .2s}
+.foot-links a:hover{color:var(--w)}
+
+/* ╔══════════════════════════════════════════╗
+   ║  REVEAL                                  ║
+   ╚══════════════════════════════════════════╝ */
+.rv{
+  opacity:0;transform:translateY(22px);
+  transition:opacity .7s var(--ease),transform .7s var(--ease);
+}
+.rv.on{opacity:1;transform:none}
+.d1{transition-delay:.04s}.d2{transition-delay:.10s}.d3{transition-delay:.17s}
+.d4{transition-delay:.24s}.d5{transition-delay:.31s}.d6{transition-delay:.38s}
+
+/* ╔══════════════════════════════════════════╗
+   ║  RESPONSIVE                              ║
+   ╚══════════════════════════════════════════╝ */
+@media(max-width:980px){
+  .hero{grid-template-columns:1fr;padding:130px 0 80px;gap:52px}
+  .phone{max-width:320px;margin:0 auto}
+  .feat-grid{grid-template-columns:1fr 1fr}
+  .how-grid{grid-template-columns:1fr;gap:40px}
+  .verdicts{position:static}
+  .demo-layout{grid-template-columns:1fr;gap:40px}
+  .pricing-grid{grid-template-columns:1fr;max-width:440px}
+  .faq-grid{grid-template-columns:1fr}
+  .contact-grid{grid-template-columns:1fr}
+  .feat-head{flex-direction:column;align-items:flex-start;gap:16px}
+  .nav-links{display:none}
+  .burger{display:flex}
+}
+@media(max-width:600px){
+  .w{padding:0 20px}
+  .nav-pill{margin:10px 14px 0;padding:0 16px;height:50px}
+  .feat-grid{grid-template-columns:1fr}
+  .hero h1{font-size:40px}
+  .hero-btns{flex-direction:column;align-items:flex-start}
+  section{padding:72px 0}
+  .demo-2col{grid-template-columns:1fr}
+  .contact-main{padding:24px}
+}
+</style>
 </head>
-
-
-
 <body>
-  <div class="ambient" aria-hidden="true">
-    <div class="blob"></div>
-    <div class="blob b2"></div>
-    <div class="blob b3"></div>
+
+<div class="bg-layer" aria-hidden="true"></div>
+<div class="bg-grid" aria-hidden="true"></div>
+
+<div class="page">
+
+<!-- ══ NAV ════════════════════════════════════════ -->
+<nav class="nav" id="nav">
+  <div class="nav-pill">
+    <a class="brand" href="#top">
+      <img src="AveroLogo.png" alt="Avero" class="brand-img"/>
+      <span class="brand-name">Avero</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="nav-r">
+      <button class="btn burger btn-ghost" id="menuBtn">☰</button>
+      <a class="btn btn-c" href="https://play.google.com/store/apps/details?id=com.mariusarzoiu.avero" target="_blank" rel="noopener">Download free</a>
+    </div>
   </div>
+  <div class="mob-menu" id="mobMenu">
+    <a href="#features" onclick="cm()">Features</a>
+    <a href="#how" onclick="cm()">How it works</a>
+    <a href="#pricing" onclick="cm()">Pricing</a>
+    <a href="#faq" onclick="cm()">FAQ</a>
+    <a href="#contact" onclick="cm()">Contact</a>
+  </div>
+</nav>
 
-
-
-  <nav class="nav">
-    <div class="container nav-inner">
-      <a class="brand" href="#top" aria-label="Avero">
-        <img src="AveroLogo.png" alt="Avero logo" class="logo-img">
-        <div>
-          <h1>Avero</h1>
-          <span>Stay safe, Stay online</span>
+<!-- ══ HERO ═══════════════════════════════════════ -->
+<div class="w" id="top" style="padding-top:78px">
+  <div class="hero">
+    <!-- Left -->
+    <div>
+      <div class="hero-tag rv d1"><div class="hero-tag-dot"></div>Now live on Google Play</div>
+      <h1 class="rv d2">
+        Phishing stops<br/>
+        <em>here.</em>
+      </h1>
+      <p class="hero-desc rv d3">
+        Avero runs entirely on your device — no data sent anywhere. Scan links, check passwords, and get instant alerts powered by on-device AI trained on half a million real threats.
+      </p>
+      <div class="hero-cta rv d4">
+        <div class="hero-btns">
+          <a class="btn btn-c btn-lg" href="https://play.google.com/store/apps/details?id=com.mariusarzoiu.avero" target="_blank" rel="noopener">
+            ▶&ensp;Get it on Android
+          </a>
+          <button class="btn btn-ghost btn-lg" id="demoBtnHero">Try demo</button>
         </div>
-      </a>
+        <div class="hero-proof">
+          <div class="proof">
+            <div class="proof-tick"><svg viewBox="0 0 8 8" fill="none"><path d="M1 4l2 2 4-4" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            100% on-device AI
+          </div>
+          <div class="proof">
+            <div class="proof-tick"><svg viewBox="0 0 8 8" fill="none"><path d="M1 4l2 2 4-4" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            No data uploaded
+          </div>
+          <div class="proof">
+            <div class="proof-tick"><svg viewBox="0 0 8 8" fill="none"><path d="M1 4l2 2 4-4" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            Free forever
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <div class="nav-links" id="navLinks">
+    <!-- Phone -->
+    <div class="phone-scene rv d3">
+      <div class="phone-halo"></div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="pscreen">
+          <div class="ptop">
+            <div class="ptop-title">Avero</div>
+            <div class="plive"><div class="plive-dot"></div>Scanning</div>
+          </div>
+          <div class="pinput">
+            <div class="pinput-lbl">URL</div>
+            <div class="pinput-url">http://paypal-secure.verify-login.tk</div>
+          </div>
+          <div class="pbtn">Analyse →</div>
+          <div class="presult">
+            <div class="presult-top">
+              <div class="presult-lbl">Verdict</div>
+              <div class="presult-badge">Critical</div>
+            </div>
+            <div class="pscore">
+              <div class="pscore-n">91</div>
+              <div class="pscore-d">/ 100</div>
+            </div>
+            <div class="pbar"><div class="pbar-fill"></div></div>
+            <div class="ptags">
+              <div class="ptag">brand impersonation</div>
+              <div class="ptag">free TLD</div>
+              <div class="ptag">no HTTPS</div>
+            </div>
+          </div>
+          <div class="psafe">
+            <div class="psafe-dot"></div>
+            <div class="psafe-url">https://github.com</div>
+            <div class="psafe-score">Safe · 9</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="sep"/>
+
+<!-- ══ FEATURES ═══════════════════════════════════ -->
+<section id="features">
+  <div class="w">
+    <div class="feat-head">
+      <div>
+        <div class="eyebrow rv">Capabilities</div>
+        <h2 class="sh rv d1">Everything you need<br/><em>to stay protected.</em></h2>
+      </div>
+      <a class="btn rv d2" href="https://play.google.com/store/apps/details?id=com.mariusarzoiu.avero" target="_blank" rel="noopener">Get the app →</a>
+    </div>
+    <div class="feat-grid">
+      <div class="feat rv d1">
+        <div class="feat-ico">🔗</div>
+        <h3>Link scanner</h3>
+        <p>Paste any URL and receive a detailed risk score in under a second. Checks structure, redirects, TLD reputation, and known phishing signals.</p>
+      </div>
+      <div class="feat rv d2">
+        <div class="feat-ico">🔐</div>
+        <h3>Password checker</h3>
+        <p>Entropy scoring, pattern detection, and actionable suggestions — all computed locally. Your password never leaves your device.</p>
+      </div>
+      <div class="feat rv d3">
+        <div class="feat-ico">🖼️</div>
+        <h3>Image scanner</h3>
+        <p>On-device OCR extracts URLs hidden in screenshots and photos. Catches phishing attempts that hide inside images.</p>
+      </div>
+      <div class="feat rv d4">
+        <div class="feat-ico">🔔</div>
+        <h3>Auto-protection</h3>
+        <p>Monitors incoming SMS and app notifications silently. Scans links automatically and alerts you before you tap anything suspicious.</p>
+      </div>
+      <div class="feat rv d5">
+        <div class="feat-ico">📚</div>
+        <h3>Security courses</h3>
+        <p>Bite-sized lessons on phishing, social engineering, and safe browsing — with interactive quizzes. Fully offline.</p>
+      </div>
+      <div class="feat rv d6">
+        <div class="feat-ico">📋</div>
+        <h3>Scan history</h3>
+        <p>Every scan is stored locally with verdict, score, and timestamp. Filter by type, review past results, track your protection over time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep"/>
+
+<!-- ══ HOW IT WORKS ════════════════════════════════ -->
+<section id="how">
+  <div class="w">
+    <div class="eyebrow rv">Under the hood</div>
+    <h2 class="sh rv d1">Three layers of <em>analysis.</em></h2>
+    <p class="sp rv d2">All running locally. All in under a second.</p>
+    <div class="how-grid">
+      <div class="steps">
+        <div class="step rv d1">
+          <div class="step-n">1</div>
+          <div>
+            <h4>Feature extraction</h4>
+            <p>16 structural signals are pulled from the URL — length, subdomain count, special characters, TLD risk, entropy, and known suspicious patterns.</p>
+          </div>
+        </div>
+        <div class="step rv d2">
+          <div class="step-n">2</div>
+          <div>
+            <h4>On-device ML model</h4>
+            <p>A TFLite neural network, trained on 530,000 real phishing URLs via knowledge distillation, runs inference entirely locally — no internet needed.</p>
+          </div>
+        </div>
+        <div class="step rv d3">
+          <div class="step-n">3</div>
+          <div>
+            <h4>Heuristic layer</h4>
+            <p>A rule engine catches brand impersonation, IP-based hosts, redirect chains, and urgency tactics that pure ML may miss.</p>
+          </div>
+        </div>
+        <div class="step rv d4">
+          <div class="step-n">4</div>
+          <div>
+            <h4>Clear verdict</h4>
+            <p>Safe · Suspicious · Phishing · Critical. A numeric score plus a plain-language explanation of exactly why the decision was made.</p>
+          </div>
+        </div>
+      </div>
+      <div class="verdicts rv d2">
+        <div class="v-head">
+          <div class="v-head-l">Sample verdicts</div>
+          <div class="v-head-r">Live outputs</div>
+        </div>
+        <div class="v-list">
+          <div class="v-row"><div class="vd s"></div><div class="v-url">https://google.com/search</div><div class="vb s">Safe · 8</div></div>
+          <div class="v-row"><div class="vd d"></div><div class="v-url">http://paypal-verify.tk/login</div><div class="vb d">Critical · 91</div></div>
+          <div class="v-row"><div class="vd w"></div><div class="v-url">https://bit.ly/3xK2mPq</div><div class="vb w">Suspicious · 48</div></div>
+          <div class="v-row"><div class="vd d"></div><div class="v-url">http://192.168.1.1/admin</div><div class="vb d">Phishing · 76</div></div>
+          <div class="v-row"><div class="vd s"></div><div class="v-url">https://github.com/user/repo</div><div class="vb s">Safe · 12</div></div>
+          <div class="v-row"><div class="vd d"></div><div class="v-url">http://apple-id.secure-login.ml</div><div class="vb d">Critical · 88</div></div>
+          <div class="v-row"><div class="vd w"></div><div class="v-url">https://tinyurl.com/update</div><div class="vb w">Suspicious · 44</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep"/>
+
+<!-- ══ DEMO ════════════════════════════════════════ -->
+<section id="demo">
+  <div class="w">
+    <div class="eyebrow rv">Try it</div>
+    <h2 class="sh rv d1"><em>Scan a link</em> right now.</h2>
+    <p class="sp rv d2">Same engine as the app. Nothing is sent to any server.</p>
+    <div class="demo-layout">
+      <div class="demo-card rv d2">
+        <div class="demo-topbar">
+          <div class="demo-dots"><div class="dd"></div><div class="dd"></div><div class="dd"></div></div>
+          <div class="demo-lbl">avero · web demo</div>
+        </div>
+        <div class="demo-body">
+          <input class="demo-inp" id="demoInp" placeholder="Paste any URL…" autocomplete="off" spellcheck="false"/>
+          <button class="demo-sbtn" id="demoBtn">Scan link</button>
+          <div class="demo-pbar"><div class="demo-pbar-fill" id="dBar"></div></div>
+          <div class="demo-row">
+            <div class="demo-state" id="dState"><div class="demo-state-dot"></div><span id="dStateText">Waiting for input</span></div>
+            <div class="demo-sig" id="dSig">—</div>
+          </div>
+          <div class="demo-2col">
+            <div class="demo-mini">
+              <div class="dm-lbl">Risk score</div>
+              <div class="dm-val" id="dScore" style="color:var(--d)">—</div>
+              <div class="dm-sub">0 safe · 100 critical</div>
+            </div>
+            <div class="demo-mini">
+              <div class="dm-lbl">Verdict</div>
+              <div class="dm-val" id="dVerdict" style="font-size:18px;color:var(--d)">—</div>
+              <div class="dm-sub" id="dVsub">Paste a URL above</div>
+            </div>
+          </div>
+          <div class="demo-signals-box">
+            <div class="dsb-lbl">Signals</div>
+            <div class="dsb-val" id="dSignals">No signals detected yet.</div>
+          </div>
+        </div>
+      </div>
+      <div class="rv d3">
+        <h3 style="font-family:var(--serif);font-size:26px;font-weight:400;letter-spacing:-.02em;margin-bottom:24px">How to use</h3>
+        <div class="steps" style="gap:0">
+          <div class="step" style="padding:18px 0">
+            <div class="step-n">1</div>
+            <div><h4>Paste a URL</h4><p>Any link — from SMS, email, WhatsApp, or a browser tab.</p></div>
+          </div>
+          <div class="step" style="padding:18px 0">
+            <div class="step-n">2</div>
+            <div><h4>Press Scan</h4><p>The heuristic engine runs 10 checks instantly in your browser.</p></div>
+          </div>
+          <div class="step" style="padding:18px 0;border-bottom:none">
+            <div class="step-n">3</div>
+            <div><h4>Read the verdict</h4><p>Score + verdict + full signal breakdown. No account required.</p></div>
+          </div>
+        </div>
+        <button class="btn btn-ghost" id="loadExampleBtn" style="width:100%;justify-content:center;margin-top:24px">Load phishing example →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep"/>
+
+<!-- ══ PRICING ═════════════════════════════════════ -->
+<section id="pricing">
+  <div class="w">
+    <div class="eyebrow rv">Plans</div>
+    <h2 class="sh rv d1">Simple,<br/><em>transparent pricing.</em></h2>
+    <p class="sp rv d2">Core protection is free forever. Pro is coming — join the waitlist.</p>
+    <div class="pricing-grid">
+      <div class="plan rv d1">
+        <div class="plan-name">Free</div>
+        <div class="plan-desc">Available now · No account needed</div>
+        <div class="plan-hr"></div>
+        <ul class="plan-list">
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Link scanning with risk score</li>
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Password strength checker</li>
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Image URL scanner (OCR)</li>
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Security courses &amp; quizzes</li>
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Full local scan history</li>
+        </ul>
+        <a class="btn" style="justify-content:center" href="https://play.google.com/store/apps/details?id=com.mariusarzoiu.avero" target="_blank" rel="noopener">Download free</a>
+      </div>
+
+      <div class="plan pop rv d2">
+        <div class="plan-chip">Coming soon</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-desc">Join waitlist for early access</div>
+        <div class="plan-hr"></div>
+        <ul class="plan-list">
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Everything in Free</li>
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Auto SMS &amp; notification scanning</li>
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Cloud history sync</li>
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Advanced threat reports</li>
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Priority support</li>
+        </ul>
+        <a class="btn btn-c" style="justify-content:center" href="#contact">Join waitlist</a>
+      </div>
+
+      <div class="plan rv d3">
+        <div class="plan-chip">Coming soon</div>
+        <div class="plan-name">Teams</div>
+        <div class="plan-desc">For organisations &amp; businesses</div>
+        <div class="plan-hr"></div>
+        <ul class="plan-list">
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Everything in Pro</li>
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Shared dashboard &amp; reporting</li>
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Admin policy controls</li>
+          <li><div class="pcheck"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="var(--g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Security awareness training</li>
+        </ul>
+        <a class="btn btn-ghost" style="justify-content:center" href="#contact">Contact us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="sep"/>
+
+<!-- ══ FAQ ═════════════════════════════════════════ -->
+<section id="faq">
+  <div class="w">
+    <div class="eyebrow rv">Questions</div>
+    <h2 class="sh rv d1">Frequently<br/><em>asked.</em></h2>
+    <div class="faq-grid">
+      <details class="rv d1">
+        <summary>Does Avero upload my links or passwords?<span class="faq-plus">+</span></summary>
+        <p>No. Every analysis runs entirely on your device using a local TFLite model. URLs, passwords, and images never reach any server. No account is required to scan.</p>
+      </details>
+      <details class="rv d2">
+        <summary>How accurate is the detection?<span class="faq-plus">+</span></summary>
+        <p>The ML model achieves ~87% accuracy, trained on 530,000 URLs. A heuristic layer adds extra coverage for patterns like brand impersonation and IP-based hosts.</p>
+      </details>
+      <details class="rv d3">
+        <summary>Does it work without internet?<span class="faq-plus">+</span></summary>
+        <p>Yes. Link scanning, password analysis, image OCR, and courses all work fully offline. Optional redirect-chain checks may use the network.</p>
+      </details>
+      <details class="rv d4">
+        <summary>What Android version is required?<span class="faq-plus">+</span></summary>
+        <p>Android 8.0 (API 26) and above — covering over 95% of active Android devices globally.</p>
+      </details>
+      <details class="rv d5">
+        <summary>Is there an iOS version?<span class="faq-plus">+</span></summary>
+        <p>Not yet. Avero is currently Android-only. Join the waitlist to be notified when iOS support arrives.</p>
+      </details>
+      <details class="rv d6">
+        <summary>How does auto SMS protection work?<span class="faq-plus">+</span></summary>
+        <p>Avero monitors incoming SMS and notifications from selected apps. When a URL is found, it is scanned locally and you're alerted immediately — no message content reaches any server.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<hr class="sep"/>
+
+<!-- ══ CONTACT ═════════════════════════════════════ -->
+<section id="contact">
+  <div class="w">
+    <div class="eyebrow rv">Contact</div>
+    <h2 class="sh rv d1">Get in touch.</h2>
+    <div class="contact-grid">
+      <div class="contact-main rv d2">
+        <h3>Join the waitlist</h3>
+        <p>Be the first to know when Pro launches. No spam — ever.</p>
+        <div class="inp-row">
+          <input class="txt-inp" id="emailInp" type="email" placeholder="you@example.com" autocomplete="email"/>
+          <button class="btn btn-c" id="joinBtn">Join →</button>
+        </div>
+        <div class="join-note"><span id="joinMsg"></span>&ensp;One-click unsubscribe anytime.</div>
+      </div>
+      <div class="contact-side">
+        <div class="icard rv d3">
+          <div class="icard-lbl">Email</div>
+          <div class="copy-r">
+            <div class="icard-val"><a href="mailto:nextbytestudioscontact@gmail.com">nextbytestudioscontact@gmail.com</a></div>
+            <button class="btn" id="copyBtn" style="font-size:12px;padding:7px 12px;flex:0 0 auto">Copy</button>
+          </div>
+        </div>
+        <div class="icard rv d4">
+          <div class="icard-lbl">Response time</div>
+          <div class="icard-val">Within 24 hours</div>
+        </div>
+        <div class="icard rv d5">
+          <div class="icard-lbl">Built by</div>
+          <div class="icard-val">Marius Arzoiu</div>
+          <div class="icard-sub">NextByteStudios · Romania</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══════════════════════════════════════ -->
+<footer>
+  <div class="w">
+    <div class="foot">
+      <div>
+        <div class="foot-brand">
+          <img src="AveroLogo.png" alt="Avero"/>
+          <span>Avero</span>
+        </div>
+        <div class="foot-copy">© <span id="yr"></span> Avero · NextByteStudios · Marius Arzoiu</div>
+      </div>
+      <div class="foot-links">
         <a href="#features">Features</a>
-        <a href="#trust">Why Avero</a>
+        <a href="#how">How it works</a>
         <a href="#pricing">Pricing</a>
         <a href="#faq">FAQ</a>
-      </div>
-
-      <div style="display:flex; gap:10px; align-items:center;">
-        <button class="btn burger" id="menuBtn" aria-label="Open menu">Menu</button>
-        <a class="btn btn-text" href="#pricing">See plans</a>
-        <a class="btn primary" href="https://play.google.com/store/apps/details?id=com.mariusarzoiu.avero&hl=ro"
-          target="_blank" rel="noopener">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M3 2l14 10L3 22V2z" fill="white" />
-          </svg>
-          <span class="btn-text">Get it</span>
-        </a>
+        <a href="#contact">Contact</a>
+        <a href="#top">↑ Top</a>
       </div>
     </div>
-  </nav>
-
-  <header id="top">
-    <div class="container hero">
-      <div class="hero-left reveal">
-        <div class="eyebrow">
-          <span class="pill">NEW</span>
-          AI-assisted phishing detection • Premium-grade UX
-        </div>
-
-        <h2>
-          A <span class="grad">premium shield</span><br />
-          against phishing.
-        </h2>
-
-        <p>
-          Avero helps you spot suspicious links, pages, and messages before they steal your credentials.
-          Fast scans, clear risk scores, and real-time alerts — built for everyday safety.
-        </p>
-
-        <div class="hero-actions">
-          <div class="cta-row">
-            <a class="btn primary" href="https://play.google.com/store/apps/details?id=com.mariusarzoiu.avero&hl=ro"
-              target="_blank" rel="noopener">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M3 2l14 10L3 22V2z" fill="white" />
-              </svg>
-              Install on Play
-            </a>
-
-            <a class="btn ghost" href="#features">Explore</a>
-            <button class="btn ghost" id="runDemoBtn">Demo</button>
-          </div>
-
-          <div class="micro-proof">
-            <div class="mp"><b>Fast</b><span>scans in seconds</span></div>
-            <div class="sep"></div>
-            <div class="mp"><b>Private</b><span>by design</span></div>
-            <div class="sep"></div>
-            <div class="mp"><b>Clear</b><span>risk explanation</span></div>
-          </div>
-
-          <div class="chip-row" id="trust">
-            <span class="chip2">⚡ Instant risk scoring</span>
-            <span class="chip2">🔒 Protection flows</span>
-            <span class="chip2">🧠 Smart warnings</span>
-            <span class="chip2">📱 Mobile-first</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card demo reveal">
-        <div class="demo-top">
-          <div class="demo-title">
-            <h3>Live Preview</h3>
-            <span>See how Avero would flag a link</span>
-          </div>
-          <div class="chip"><i></i> System online</div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-grid">
-            <div class="mini">
-              <div class="k">Threat level <span class="badge" id="badge">Neutral</span></div>
-              <div class="v" id="riskScore">42</div>
-              <div class="sub">A simple risk score to guide your next action.</div>
-            </div>
-            <div class="mini">
-              <div class="k">Recommendation <span class="badge" id="recBadge">Review</span></div>
-              <div class="v" id="recText">Proceed carefully</div>
-              <div class="sub" id="explain">We’ll highlight signals like odd domains or urgency tricks.</div>
-            </div>
-          </div>
-
-          <div class="scan">
-            <label for="urlInput">Paste a link (demo)</label>
-            <div class="row">
-              <input id="urlInput" placeholder="https://secure-login.example.com" />
-              <button class="btn primary" id="scanBtn"><span class="dot"></span> Scan</button>
-            </div>
-
-            <div class="bar" aria-hidden="true">
-              <div id="barFill"></div>
-            </div>
-
-            <div class="result">
-              <span class="state" id="state">
-                <span class="s"></span>
-                <span id="stateText">Waiting…</span>
-              </span>
-              <span id="signal">Signals: —</span>
-            </div>
-          </div>
-        </div>
-
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <div class="chip">✔ Clean UI</div>
-          <div class="chip">✔ Actionable warnings</div>
-          <div class="chip">✔ Built for daily use</div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <section id="features">
-    <div class="container">
-      <div class="section-title reveal">
-        <div>
-          <h3>Features that feel premium</h3>
-          <p>Designed to be fast, calm, and extremely clear — so users take the right action.</p>
-        </div>
-        <a class="btn" href="#contact">Request access</a>
-      </div>
-
-      <div class="grid-3">
-        <div class="feature reveal">
-          <div class="icon" aria-hidden="true">
-            <!-- spark -->
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2l1.6 6.2L20 12l-6.4 3.8L12 22l-1.6-6.2L4 12l6.4-3.8L12 2z" stroke="rgba(255,255,255,.85)"
-                stroke-width="1.6" />
-            </svg>
-          </div>
-          <h4>Instant scans</h4>
-          <p>Analyze links and pages in seconds with a clean summary of what matters.</p>
-        </div>
-
-        <div class="feature reveal">
-          <div class="icon" aria-hidden="true">
-            <!-- shield -->
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2l8 4v6c0 5-3.4 9.4-8 10-4.6-.6-8-5-8-10V6l8-4z" stroke="rgba(255,255,255,.85)"
-                stroke-width="1.6" />
-              <path d="M9 12l2 2 4-5" stroke="rgba(64,243,179,.95)" stroke-width="1.8" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
-          </div>
-          <h4>Actionable protection</h4>
-          <p>Not just alerts — Avero guides users to safer steps (block, report, or continue).</p>
-        </div>
-
-        <div class="feature reveal">
-          <div class="icon" aria-hidden="true">
-            <!-- eye -->
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" stroke="rgba(255,255,255,.85)"
-                stroke-width="1.6" />
-              <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" stroke="rgba(106,227,255,.95)" stroke-width="1.6" />
-            </svg>
-          </div>
-          <h4>Clear explanations</h4>
-          <p>See *why* something looks suspicious (typos, odd TLDs, urgency tactics, impersonation cues).</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="pricing">
-    <div class="container">
-      <div class="section-title reveal">
-        <div>
-          <h3>Plans</h3>
-          <p>Free features are available now. Premium is coming soon — join the waitlist to get notified.</p>
-        </div>
-        <a class="btn" href="#contact">Join waitlist</a>
-      </div>
-
-      <div class="pricing">
-        <div class="price-card reveal">
-          <div class="price-top">
-            <div>
-              <h4>Free</h4>
-              <div class="amount">Free <small>available now</small></div>
-            </div>
-            <div class="tag">Available now</div>
-          </div>
-          <ul class="list">
-            <li><span class="check">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M20 6L9 17l-5-5" stroke="rgba(64,243,179,.95)" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
-              </span> Basic link scanning</li>
-            <li><span class="check">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M20 6L9 17l-5-5" stroke="rgba(64,243,179,.95)" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
-              </span> Risk score + summary</li>
-            <li><span class="check">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M20 6L9 17l-5-5" stroke="rgba(64,243,179,.95)" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
-              </span> Safe browsing tips</li>
-          </ul>
-        </div>
-
-        <div class="price-card pop reveal">
-          <div class="price-top">
-            <div>
-              <h4>Pro</h4>
-              <div class="amount">Coming soon <small>join waitlist</small></div>
-            </div>
-            <div class="tag">Coming soon</div>
-          </div>
-          <ul class="list">
-            <li><span class="check">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M20 6L9 17l-5-5" stroke="rgba(64,243,179,.95)" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
-              </span> Advanced detection signals</li>
-
-            <li><span class="check">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M20 6L9 17l-5-5" stroke="rgba(64,243,179,.95)" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
-              </span> Smarter protection flows</li>
-
-            <li><span class="check">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M20 6L9 17l-5-5" stroke="rgba(64,243,179,.95)" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
-              </span> Early beta access</li>
-          </ul>
-
-          <a class="btn primary" href="#contact" style="margin-top:12px; width:100%;">
-            Join waitlist
-          </a>
-
-          <p style="margin:10px 0 0; color: var(--muted2); font-size:12px;">
-            No payment required. We’ll email you when it’s ready.
-          </p>
-        </div>
-
-        <div class="price-card reveal">
-          <div class="price-top">
-            <div>
-              <h4>Teams</h4>
-              <div class="amount">Coming soon <small>contact us</small></div>
-            </div>
-            <div class="tag">Coming soon</div>
-          </div>
-          <ul class="list">
-            <li><span class="check">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M20 6L9 17l-5-5" stroke="rgba(64,243,179,.95)" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
-              </span> Shared reporting & insights</li>
-            <li><span class="check">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M20 6L9 17l-5-5" stroke="rgba(64,243,179,.95)" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
-              </span> Policy recommendations</li>
-            <li><span class="check">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M20 6L9 17l-5-5" stroke="rgba(64,243,179,.95)" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg>
-              </span> Admin controls</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="faq">
-    <div class="container">
-      <div class="section-title reveal">
-        <div>
-          <h3>FAQ</h3>
-          <p>Short answers that feel confident and trustworthy.</p>
-        </div>
-      </div>
-
-      <div class="faq">
-        <details class="reveal">
-          <summary>
-            Does Avero store my links?
-            <span class="chev" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M6 9l6 6 6-6" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round" />
-              </svg>
-            </span>
-          </summary>
-          <p>Privacy-first by design. You can run scans without building a personal browsing history.</p>
-        </details>
-
-        <details class="reveal">
-          <summary>
-            What does the risk score mean?
-            <span class="chev" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M6 9l6 6 6-6" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round" />
-              </svg>
-            </span>
-          </summary>
-          <p>It’s a simple indicator from low to high risk, based on signals like domain patterns, suspicious keywords,
-            and urgency tactics.</p>
-        </details>
-
-        <details class="reveal">
-          <summary>
-            Is this a browser extension or an app?
-            <span class="chev" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M6 9l6 6 6-6" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round" />
-              </svg>
-            </span>
-          </summary>
-          <p>It can be both. Start as a mobile-first experience and expand to extensions and team dashboards later.</p>
-        </details>
-
-        <details class="reveal">
-          <summary>
-            When is it available?
-            <span class="chev" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M6 9l6 6 6-6" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round" />
-              </svg>
-            </span>
-          </summary>
-          <p>Join the early access list. You’ll get updates and a first invite when the beta is ready.</p>
-        </details>
-      </div>
-    </div>
-
-  </section>
-
-  <section id="contact">
-    <div class="container">
-
-      <!-- TITLU SECȚIUNE -->
-      <div class="section-title reveal">
-        <div>
-          <h3>Contact</h3>
-          <p>We’re here for early access, partnerships and security discussions.</p>
-        </div>
-      </div>
-
-      <div class="contact-wrap">
-        <div class="card contact-card reveal">
-          <div class="section-title" style="margin:0;">
-            <div>
-              <h3>Get early access</h3>
-              <p>Drop your email and we’ll notify you when Avero opens beta. No spam.</p>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <input id="email" type="email" placeholder="you@example.com" autocomplete="email" required />
-            <button class="btn primary" id="joinBtn"><span class="dot"></span> Join</button>
-          </div>
-
-          <div class="small-note">
-            <span id="joinMsg" style="color: rgba(45,225,163,.95); font-weight:800;"></span>
-            <span style="margin-left:10px;">One-click unsubscribe anytime.</span>
-          </div>
-        </div>
-
-        <div class="card contact-side reveal">
-          <div class="kv">
-            <div class="k">Email</div>
-            <div class="copy">
-              <div class="v" id="supportEmail">nextbytestudioscontact@gmail.com</div>
-              <button class="btn" id="copyEmailBtn">Copy</button>
-            </div>
-          </div>
-
-          <div class="kv">
-            <div class="k">Response time</div>
-            <div class="v">Usually within 24h</div>
-          </div>
-
-          <div class="kv">
-            <div class="k">What you’ll get</div>
-            <div class="v" style="font-size:13px; font-weight:700; color: var(--muted);">
-              • Beta invite<br />
-              • Product updates<br />
-              • Security tips
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <div class="container foot">
-      <div>
-        © <span id="y"></span> Avero. Built by <b>Marius Arzoiu</b> · A product of <b>NextByteStudios</b>.
-      </div>
-      <div class="links">
-        <a href="#features">Features</a>
-        <a href="#pricing">Plans</a>
-        <a href="#faq">FAQ</a>
-        <a href="#top">Back to top</a>
-      </div>
-    </div>
-  </footer>
-
-  <script>
-    // Mobile menu (simple)
-    const menuBtn = document.getElementById('menuBtn');
-    const navLinks = document.getElementById('navLinks');
-    if (menuBtn) {
-      menuBtn.addEventListener('click', () => {
-        const shown = navLinks.style.display === 'flex';
-        navLinks.style.display = shown ? 'none' : 'flex';
-        navLinks.style.flexDirection = 'column';
-        navLinks.style.gap = '6px';
-        navLinks.style.position = 'absolute';
-        navLinks.style.right = '4%';
-        navLinks.style.top = '62px';
-        navLinks.style.padding = '10px';
-        navLinks.style.borderRadius = '18px';
-        navLinks.style.background = 'rgba(10,15,31,.78)';
-        navLinks.style.border = '1px solid rgba(255,255,255,.10)';
-        navLinks.style.backdropFilter = 'blur(12px)';
-      });
-    }
-
-    // Reveal on scroll
-    const reveals = [...document.querySelectorAll('.reveal')];
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) e.target.classList.add('show');
-      });
-    }, { threshold: 0.12 });
-    reveals.forEach(el => io.observe(el));
-
-    // Demo scanner (toy logic)
-    const urlInput = document.getElementById('urlInput');
-    const scanBtn = document.getElementById('scanBtn');
-    const runDemoBtn = document.getElementById('runDemoBtn');
-
-    const riskScore = document.getElementById('riskScore');
-    const badge = document.getElementById('badge');
-    const recText = document.getElementById('recText');
-    const recBadge = document.getElementById('recBadge');
-    const explain = document.getElementById('explain');
-
-    const state = document.getElementById('state');
-    const stateText = document.getElementById('stateText');
-    const signal = document.getElementById('signal');
-    const barFill = document.getElementById('barFill');
-
-    function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
-
-    function analyze(url) {
-      const u = (url || '').toLowerCase().trim();
-      let score = 18;
-      const sig = [];
-
-      if (!u) { return { score: 42, sig: ["no input"], state: "warn" }; }
-
-      if (u.includes('@')) { score += 28; sig.push("contains @"); }
-      if (u.includes('bit.ly') || u.includes('tinyurl') || u.includes('t.co')) { score += 26; sig.push("shortener"); }
-      if (u.includes('login') || u.includes('verify') || u.includes('secure') || u.includes('update')) { score += 14; sig.push("credential bait"); }
-      if (u.includes('paypal') || u.includes('apple') || u.includes('google') || u.includes('microsoft')) { score += 10; sig.push("brand impersonation"); }
-      if (u.includes('free') || u.includes('gift') || u.includes('prize') || u.includes('urgent')) { score += 12; sig.push("urgency / lure"); }
-      if (u.split('.').length > 4) { score += 10; sig.push("many subdomains"); }
-      if (u.includes('http://')) { score += 10; sig.push("not https"); }
-
-      // very naive "safe-ish" hints
-      if (u.startsWith('https://') && (u.includes('.gov') || u.includes('.edu'))) { score -= 10; sig.push("trusted TLD hint"); }
-      if (u.includes('avero') || u.includes('nextbyte')) { score -= 8; sig.push("known brand"); }
-
-      score = clamp(score, 0, 100);
-
-      let level = "safe";
-      if (score >= 70) level = "danger";
-      else if (score >= 45) level = "warn";
-
-      return { score, sig, level };
-    }
-
-    function paint({ score, sig, level }) {
-      riskScore.textContent = String(score);
-      barFill.style.width = score + "%";
-
-      state.classList.remove('safe', 'warn', 'danger');
-      state.classList.add(level);
-
-      if (level === "safe") {
-        badge.textContent = "Low";
-        recBadge.textContent = "Continue";
-        recText.textContent = "Looks safe";
-        explain.textContent = "No major red flags detected. Still double-check the domain.";
-        stateText.textContent = "Low risk";
-        signal.textContent = "Signals: " + (sig.length ? sig.slice(0, 2).join(", ") : "none");
-      } else if (level === "warn") {
-        badge.textContent = "Medium";
-        recBadge.textContent = "Verify";
-        recText.textContent = "Proceed carefully";
-        explain.textContent = "Some signals look suspicious. Verify the sender and domain before logging in.";
-        stateText.textContent = "Medium risk";
-        signal.textContent = "Signals: " + (sig.length ? sig.slice(0, 3).join(", ") : "mixed signals");
-      } else {
-        badge.textContent = "High";
-        recBadge.textContent = "Block";
-        recText.textContent = "Do not open";
-        explain.textContent = "High-confidence phishing indicators. Avoid entering any credentials.";
-        stateText.textContent = "High risk";
-        signal.textContent = "Signals: " + (sig.length ? sig.slice(0, 4).join(", ") : "multiple red flags");
-      }
-    }
-
-    function runScan() {
-      const res = analyze(urlInput.value);
-      paint(res);
-    }
-
-    scanBtn.addEventListener('click', runScan);
-    urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') runScan(); });
-
-    runDemoBtn.addEventListener('click', () => {
-      urlInput.value = "http://secure-login-paypal.verify-now.com";
-      runScan();
-      urlInput.focus();
-    });
-    // Join CTA (Firebase)
-    const joinBtn = document.getElementById('joinBtn');
-    const email = document.getElementById('email');
-    const joinMsg = document.getElementById('joinMsg');
-
-    function setJoinMsg(text, kind = "ok") {
-      joinMsg.textContent = text;
-      if (kind === "ok") joinMsg.style.color = "rgba(64,243,179,.95)";
-      else if (kind === "warn") joinMsg.style.color = "rgba(255,211,122,.95)";
-      else joinMsg.style.color = "rgba(255,77,109,.95)";
-    }
-
-    async function onJoin() {
-      const v = (email.value || '').trim().toLowerCase();
-
-      if (!v || !v.includes('@')) {
-        setJoinMsg("Please enter a valid email.", "warn");
-        return;
-      }
-
-      // UI loading
-      joinBtn.disabled = true;
-      const old = joinBtn.innerHTML;
-      joinBtn.innerHTML = '<span class="dot"></span> Saving…';
-      setJoinMsg("");
-
-      try {
-        await window.averoJoinNewsletter(v);
-        setJoinMsg("You're on the list ✔", "ok");
-        email.value = "";
-      } catch (e) {
-        console.error(e);
-        setJoinMsg("Could not save. Try again.", "danger");
-      } finally {
-        joinBtn.disabled = false;
-        joinBtn.innerHTML = old;
-      }
-    }
-
-    joinBtn.addEventListener('click', onJoin);
-    email.addEventListener('keydown', (e) => {
-      if (e.key === "Enter") onJoin();
-    });
-
-    // Enter key support
-    email.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') joinBtn.click();
-    });
-
-    // Copy email (contact)
-    const copyEmailBtn = document.getElementById('copyEmailBtn');
-    const supportEmail = document.getElementById('supportEmail');
-
-    if (copyEmailBtn && supportEmail) {
-      copyEmailBtn.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(supportEmail.textContent.trim());
-          copyEmailBtn.textContent = 'Copied ✔';
-          setTimeout(() => (copyEmailBtn.textContent = 'Copy'), 1200);
-        } catch {
-          copyEmailBtn.textContent = 'Copy failed';
-          setTimeout(() => (copyEmailBtn.textContent = 'Copy'), 1200);
-        }
-      });
-    }
-
-    document.getElementById('y').textContent = new Date().getFullYear();
-
-    // initial state
-    paint({ score: 42, sig: [], level: "warn" });
-
-    // Smart hide navbar on scroll
-    const nav = document.querySelector('.nav');
-    let lastScroll = 0;
-
-    window.addEventListener('scroll', () => {
-      const currentScroll = window.pageYOffset;
-
-      // dacă e sus de tot → mereu vizibil
-      if (currentScroll <= 10) {
-        nav.classList.remove('hide');
-        lastScroll = currentScroll;
-        return;
-      }
-
-      // scroll în jos → ascunde
-      if (currentScroll > lastScroll) {
-        nav.classList.add('hide');
-      }
-      // scroll în sus → arată
-      else {
-        nav.classList.remove('hide');
-      }
-
-      lastScroll = currentScroll;
-    });
-
-  </script>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // Config-ul tău (copiat exact)
-    const firebaseConfig = {
-      apiKey: "AIzaSyBaRAmFLvCWcMzJvyZfxvaS8rB_LeoH8Jk",
-      authDomain: "avero-ebb6e.firebaseapp.com",
-      projectId: "avero-ebb6e",
-      storageBucket: "avero-ebb6e.firebasestorage.app",
-      messagingSenderId: "748176469812",
-      appId: "1:748176469812:web:72e5634b3145ffd9457f61",
-      measurementId: "G-F9XV0R4VB0"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // helper: face un ID sigur din email (fără duplicate)
-    function emailToId(email) {
-      return email
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, "")
-        .replace(/[^a-z0-9@._-]/g, "_");
-    }
-
-    // expun funcția către script-ul normal
-    window.averoJoinNewsletter = async (email) => {
-      const id = emailToId(email);
-
-      await setDoc(doc(db, "newsletter_signups", id), {
-        email,
-        createdAt: serverTimestamp(),
-        source: "avero-landing"
-      }, { merge: true });
-    };
-  </script>
-
+  </div>
+</footer>
+
+</div><!-- .page -->
+
+<script>
+/* Year */
+document.getElementById('yr').textContent=new Date().getFullYear();
+
+/* Nav hide */
+const nav=document.getElementById('nav');
+let last=0;
+window.addEventListener('scroll',()=>{
+  const y=window.scrollY;
+  nav.classList.toggle('hide',y>last&&y>100);
+  last=y;
+},{passive:true});
+
+/* Mobile menu */
+const menuBtn=document.getElementById('menuBtn');
+const mob=document.getElementById('mobMenu');
+menuBtn.addEventListener('click',()=>mob.classList.toggle('open'));
+function cm(){mob.classList.remove('open')}
+
+/* Reveal */
+const obs=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('on')});
+},{threshold:0.08});
+document.querySelectorAll('.rv').forEach(el=>obs.observe(el));
+
+/* ── Scanner ──────────────────────────────── */
+function analyze(url){
+  const u=url.toLowerCase().trim();
+  if(!u)return{score:0,sigs:[],level:'neutral'};
+  let s=8,sigs=[];
+  if(u.includes('@'))                                              {s+=28;sigs.push('@ symbol in URL')}
+  if(/bit\.ly|tinyurl|t\.co|goo\.gl|ow\.ly/.test(u))             {s+=24;sigs.push('URL shortener')}
+  if(/login|verify|secure|update|confirm|account/.test(u))        {s+=14;sigs.push('credential bait')}
+  if(/paypal|apple|google|amazon|microsoft|netflix|bank/.test(u)) {s+=12;sigs.push('brand impersonation')}
+  if(/free|gift|prize|urgent|alert|winner|congratul/.test(u))     {s+=12;sigs.push('urgency / lure tactic')}
+  if((u.match(/\./g)||[]).length>4)                               {s+=10;sigs.push('excessive subdomains')}
+  if(u.startsWith('http://'))                                     {s+=10;sigs.push('no HTTPS')}
+  if(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(u))               {s+=22;sigs.push('IP address as host')}
+  if(/\.tk|\.ml|\.ga|\.cf|\.gq|\.buzz|\.xyz/.test(u))            {s+=18;sigs.push('high-risk free TLD')}
+  if(/[^\x00-\x7F]/.test(u))                                     {s+=16;sigs.push('non-ASCII (IDN spoofing)')}
+  if(/\.gov$|\.edu$/.test(u))                                     {s-=10}
+  if(/^https:\/\/[a-z0-9-]+\.(com|org|io|dev)\/?$/.test(u))       {s-=8}
+  s=Math.max(0,Math.min(100,Math.round(s)));
+  let level='safe';
+  if(s>=70)level='danger';
+  else if(s>=40)level='warn';
+  return{score:s,sigs,level};
+}
+
+function paint(score,sigs,level){
+  const col={safe:'var(--g)',warn:'var(--a)',danger:'var(--r)',neutral:'var(--d)'};
+  const lbl={safe:'Safe ✓',warn:'Suspicious',danger:'Dangerous ✗',neutral:'—'};
+  const bar={
+    safe:'linear-gradient(90deg,var(--g),#1bb87a)',
+    warn:'linear-gradient(90deg,var(--a),#c98a10)',
+    danger:'linear-gradient(90deg,var(--a),var(--r))',
+    neutral:'linear-gradient(90deg,var(--c),#008bb5)'
+  };
+  const el=id=>document.getElementById(id);
+  el('dBar').style.width=score+'%';
+  el('dBar').style.background=bar[level];
+  el('dState').className='demo-state '+level;
+  el('dStateText').textContent={safe:'Safe',warn:'Suspicious',danger:'Dangerous',neutral:'Waiting…'}[level];
+  el('dScore').textContent=level==='neutral'?'—':score;
+  el('dScore').style.color=col[level];
+  el('dVerdict').textContent=lbl[level];
+  el('dVerdict').style.color=col[level];
+  el('dVsub').textContent=sigs.length?sigs[0]:'No suspicious signals';
+  el('dSig').textContent=sigs.length?sigs.length+' signal'+(sigs.length>1?'s':''):level==='neutral'?'—':'Clean';
+  el('dSignals').textContent=sigs.length?sigs.join(' · '):'No suspicious patterns detected.';
+}
+
+function run(){
+  const v=document.getElementById('demoInp').value.trim();
+  if(!v){paint(0,[],'neutral');return}
+  const{score,sigs,level}=analyze(v);
+  paint(score,sigs,level);
+}
+
+document.getElementById('demoBtn').addEventListener('click',run);
+document.getElementById('demoInp').addEventListener('keydown',e=>{if(e.key==='Enter')run()});
+document.getElementById('loadExampleBtn').addEventListener('click',()=>{
+  document.getElementById('demoInp').value='http://paypal-secure.verify-login.tk/@confirm?urgent=1';
+  run();
+});
+document.getElementById('demoBtnHero').addEventListener('click',()=>{
+  document.getElementById('demo').scrollIntoView({behavior:'smooth'});
+});
+
+/* Copy email */
+document.getElementById('copyBtn').addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText('nextbytestudioscontact@gmail.com');
+    document.getElementById('copyBtn').textContent='Copied ✓';}
+  catch{}
+  setTimeout(()=>{document.getElementById('copyBtn').textContent='Copy'},1600);
+});
+</script>
+
+<!-- Firebase waitlist -->
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getFirestore,doc,setDoc,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const app=initializeApp({
+  apiKey:"AIzaSyBaRAmFLvCWcMzJvyZfxvaS8rB_LeoH8Jk",
+  authDomain:"avero-ebb6e.firebaseapp.com",
+  projectId:"avero-ebb6e",
+  storageBucket:"avero-ebb6e.firebasestorage.app",
+  messagingSenderId:"748176469812",
+  appId:"1:748176469812:web:72e5634b3145ffd9457f61"
+});
+const db=getFirestore(app);
+async function join(){
+  const email=document.getElementById('emailInp').value.trim().toLowerCase();
+  const msg=document.getElementById('joinMsg');
+  if(!email||!email.includes('@')){msg.style.color='var(--a)';msg.textContent='Enter a valid email.';return}
+  const btn=document.getElementById('joinBtn');
+  btn.disabled=true;btn.textContent='Saving…';
+  try{
+    await setDoc(doc(db,'newsletter_signups',email.replace(/[^a-z0-9@._-]/g,'_')),
+      {email,createdAt:serverTimestamp(),source:'avero-v3'},{merge:true});
+    msg.style.color='var(--g)';msg.textContent="You're on the list ✓ ";
+    document.getElementById('emailInp').value='';
+  }catch{msg.style.color='var(--r)';msg.textContent='Error — please try again.'}
+  finally{btn.disabled=false;btn.textContent='Join →'}
+}
+document.getElementById('joinBtn').addEventListener('click',join);
+document.getElementById('emailInp').addEventListener('keydown',e=>{if(e.key==='Enter')join()});
+</script>
 </body>
-
-
-
 </html>
